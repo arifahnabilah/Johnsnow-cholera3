@@ -22,6 +22,13 @@ df_deaths = df_deaths.rename(columns={'X': 'longitude', 'Y': 'latitude'})
 df_pumps = df_pumps.rename(columns={'X': 'longitude', 'Y': 'latitude'})
 # ------------------------------
 
+# ---- CRS conversion: Uncomment this block ONLY if your data is NOT in WGS84 (EPSG:4326) ----
+# transformer = Transformer.from_crs("epsg:27700", "epsg:4326", always_xy=True)
+# df_deaths[['longitude', 'latitude']] = df_deaths.apply(
+#     lambda row: pd.Series(transformer.transform(row['longitude'], row['latitude'])), axis=1)
+# df_pumps[['longitude', 'latitude']] = df_pumps.apply(
+#     lambda row: pd.Series(transformer.transform(row['longitude'], row['latitude'])), axis=1)
+
 # 3. CREATE BASE MAP
 # ------------------------------
 center_lat = df_deaths['latitude'].mean()
@@ -111,6 +118,7 @@ m.get_root().add_child(macro)
 st.subheader("Interactive Cholera Map")
 
 st_folium(m, width=1000, height=600)
+
 
 
 
