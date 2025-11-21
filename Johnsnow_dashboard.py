@@ -17,7 +17,11 @@ st.title("Cholera Death Dashboard")
 df_deaths = pd.read_csv("Cholera_Deaths.csv")
 df_pumps = pd.read_csv("Pumps.csv")
 
+# ---- RENAME COLUMNS to match expected names ----
+df_deaths = df_deaths.rename(columns={'X': 'longitude', 'Y': 'latitude'})
+df_pumps = df_pumps.rename(columns={'X': 'longitude', 'Y': 'latitude'})
 # ------------------------------
+
 # 3. CREATE BASE MAP
 # ------------------------------
 center_lat = df_deaths['latitude'].mean()
@@ -107,5 +111,6 @@ m.get_root().add_child(macro)
 st.subheader("Interactive Cholera Map")
 
 st_folium(m, width=1000, height=600)
+
 
 
