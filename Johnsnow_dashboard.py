@@ -14,8 +14,8 @@ st.title("Cholera Death Dashboard")
 # ------------------------------
 # 2. LOAD DATA (CSV must have 'latitude' and 'longitude' columns)
 # ------------------------------
-df_deaths = pd.read_csv(r"D:\Semester 3\1. Geov\1. Johnsnow\Cholera\Cholera_Deaths.csv")
-df_pumps = pd.read_csv(r"D:\Semester 3\1. Geov\1. Johnsnow\Cholera\Pumps.csv")
+df_deaths = pd.read_csv("Cholera_Deaths.csv")
+df_pumps = pd.read_csv("Pumps.csv")
 
 # ------------------------------
 # 3. CREATE BASE MAP
@@ -107,4 +107,5 @@ m.get_root().add_child(macro)
 st.subheader("Interactive Cholera Map")
 
 st_folium(m, width=1000, height=600)
+
 
