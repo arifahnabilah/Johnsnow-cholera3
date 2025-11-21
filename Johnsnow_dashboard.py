@@ -76,10 +76,10 @@ folium.LayerControl().add_to(m)
 # 7. SUMMARY STATISTICS
 # -----------------------------------------
 # Total deaths based on 'Count' column
-total_deaths = pd_deaths["Count"].sum()
+total_deaths = df_deaths["Count"].sum()
 
 # Maximum deaths at a single location (highest value in Count column)
-max_death_same_location = pd_deaths["Count"].max()
+max_death_same_location = df_deaths["Count"].max()
 
 st.metric("Total Cholera Deaths", int(total_deaths))
 st.metric("Maximum Deaths at One Location", int(max_death_same_location))
@@ -132,4 +132,5 @@ m.get_root().add_child(macro)
 # ------------------------------
 st.subheader("Interactive Cholera Map")
 st_folium(m, width=1000, height=600)
+
 
