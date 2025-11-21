@@ -4,6 +4,7 @@ import folium
 from folium.plugins import MarkerCluster
 from branca.element import Template, MacroElement
 from streamlit_folium import st_folium
+from pyproj import Transformer
 
 # ------------------------------
 # 1. STREAMLIT PAGE CONFIG
@@ -12,35 +13,28 @@ st.set_page_config(page_title="Cholera Death Map", layout="wide")
 st.title("Cholera Death Dashboard")
 
 # ------------------------------
-# 2. LOAD DATA (CSV must have 'latitude' and 'longitude' columns)
+# 2. LOAD DATA (CSV must have 'X' and 'Y' columns)
 # ------------------------------
 df_deaths = pd.read_csv("Cholera_Deaths.csv")
 df_pumps = pd.read_csv("Pumps.csv")
 
-# ---- RENAME COLUMNS to match expected names ----
-df_deaths = df_deaths.rename(columns={'X': 'longitude', 'Y': 'latitude'})
-df_pumps = df_pumps.rename(columns={'X': 'longitude', 'Y': 'latitude'})
+# ---- RENAME columns to match expected names ----
+df_deaths = df_deaths.rename(columns={'X': 'easting', 'Y': 'northing'})
+df_pumps = df_pumps.rename(columns={'X': 'easting', 'Y': 'northing'})
+
+# ---- REPROJECT to WGS84 (EPSG:4326) for Folium ----
+# Change 'epsg:27700' to your source CRS if different
+transformer = Transformer.from_crs("epsg:27700", "epsg:4326", always_xy=True)
+
+# Reproject deaths
+df_deaths[['longitude', 'latitude']] = df_deaths.apply(
+    lambda row: pd.Series(transformer.transform(row['easting'], row['northing'])), axis=1)
+
+# Reproject pumps
+df_pumps[['longitude', 'latitude']] = df_pumps.apply(
+    lambda row: pd.Series(transformer.transform(row['easting'], row['northing'])), axis=1)
+
 # ------------------------------
-
-# -----------------------------------------
-# 3. REPROJECT FROM EPSG:27700 → EPSG:4326
-# -----------------------------------------
-transformer = Transformer.from_crs("EPSG:27700", "EPSG:4326", always_xy=True)
-
-def reproject(df):
-    lons = []
-    lats = []
-    for x, y in zip(df["X"], df["Y"]):
-        lon, lat = transformer.transform(x, y)
-        lons.append(lon)
-        lats.append(lat)
-    df["lon"] = lons
-    df["lat"] = lats
-    return df
-
-pd_deaths = reproject(pd_deaths)
-pd_pumps = reproject(pd_pumps)
-
 # 3. CREATE BASE MAP
 # ------------------------------
 center_lat = df_deaths['latitude'].mean()
@@ -83,7 +77,6 @@ folium.LayerControl().add_to(m)
 # ------------------------------
 template = """
 {% macro html(this, kwargs) %}
-
 <!-- TITLE -->
 <div style="
     position: fixed;
@@ -100,7 +93,6 @@ template = """
     ">
     CHOLERA DEATH MAP
 </div>
-
 <!-- LEGEND -->
 <div style="
     position: fixed;
@@ -116,7 +108,6 @@ template = """
     <i class="fa fa-circle" style="color:red;"></i> Cholera Deaths<br>
     <i class="fa fa-tint" style="color:blue;"></i> Water Pumps
 </div>
-
 {% endmacro %}
 """
 
@@ -128,10 +119,4 @@ m.get_root().add_child(macro)
 # 8. DISPLAY MAP IN STREAMLIT
 # ------------------------------
 st.subheader("Interactive Cholera Map")
-
 st_folium(m, width=1000, height=600)
-
-
-
-
-
